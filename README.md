@@ -6,6 +6,7 @@
 
 # To-Do List
 1. add a way of giving the user a hint if they want a hint.
-2. add in a leaderboard menu that shows the users with the highest amount of wins total.
+2. add a counter to keep track of how many total rounds have been played.
+3. add in a leaderboard menu that shows the users with the highest amount of wins total.
 
 ![Hangman](images/hangman.png "Hangman")
