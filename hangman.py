@@ -1,118 +1,99 @@
-# Hangman game, Created by: ThomasMatt, Updated by: Jordan Leich. Email me at jordanleich@gmail.com if you wish to
-# code together
-
-# Imports
 import random
 import time
 import colors
 import words
 
-wincount = 0
-lives = 0
 
-
-def validate(guesses):
-    global lives, wincount
-    # check guess is 1 char long and guess is in the alphabet
-    if guesses.isalpha() and len(guesses) == 1:
+def validate_guess(guess):
+    """Check if the guess is valid (1 alphabet character)."""
+    if guess.isalpha() and len(guess) == 1:
         return True
     else:
+        print(colors.red + "Invalid input! Please enter a single alphabet letter." + colors.reset)
         return False
 
 
-def restart():
-    question = input('Want to play again (yes or no): ')
-    print()
-
-    if question.lower() == 'y' or question.lower() == 'yes':
-        game()
-
-    else:
-        quit()
-
-
-def game():
-    global lives, wincount
-    word = random.choice(words.words)
-    guessed = []
-    # guessed is a list
-    Guessed_Word = list(len(word) * ".")
-    Word_In_List = list(word)
-
-    lives = int
-
-    difficulty = input(""" 
+def choose_difficulty():
+    """Prompt the player to select a difficulty level and return corresponding lives."""
+    difficulties = {"easy": 12, "medium": 9, "hard": 6, "impossible": 3}
+    while True:
+        difficulty = input("""
 Easy = 12 Lives
 Medium = 9 Lives
 Hard = 6 Lives
 Impossible = 3 Lives
-Choose a difficulty: """)
-    print()
-
-    if difficulty.lower() == 'easy' or difficulty.lower() == 'e':
-        lives = 12
-    elif difficulty.lower() == 'medium' or difficulty.lower() == 'm':
-        lives = 9
-    elif difficulty.lower() == 'hard' or difficulty.lower() == 'h':
-        lives = 6
-    elif difficulty.lower() == 'impossible' or difficulty.lower() == 'i':
-        lives = 3
-
-    else:
-        print(colors.red + 'difficulty error caught...' + colors.reset)
-        game()
-
-    while True:
-        if lives == 0:
-            print(colors.red + "Game Over!\n" + colors.reset)
-            time.sleep(1)
-            print(colors.green + "The correct word is", Word_In_List, '\n' + colors.reset)
-            time.sleep(1)
-            wincount -= 1
-            print("Win Counter: ", wincount)
-            print()
-            time.sleep(1)
-            restart()
-        # If lives is = 0 then print game over and break out of the loop
-        elif Guessed_Word == Word_In_List:
-            print(colors.green + "You guessed it!\n" + colors.reset)
-            time.sleep(1)
-            print(colors.green + "The correct word is", Word_In_List, '\n' + colors.reset)
-            time.sleep(1)
-            wincount += 1
-            print("Win Counter: ", wincount)
-            print()
-            time.sleep(1)
-            restart()
-        # check if the guessed word is correct, if it is print well done, if not break out of the loop
-        print()
-        print(" ".join(Guessed_Word))
-        # print guessed word all together with __ for each missing letter
-        print("Lives left: ", lives)
-        # print the number of lives left over
-        guess = input("Guess the letter: ")
-        print()
-        while not validate(guess):
-            print(colors.red + 'Invalid Guess, Try again...\n' + colors.reset)
-            guess = input("Guess the letter: ")
-            print()
-
-        if guess not in guessed:
-            # if the guess input is not in the guessed list
-            guessed.append(guess)
-            # add letter to the guess list
-            if guess not in Word_In_List:
-                lives -= 1
-            # if it is a new guess and it is not in the list
-            else:
-                for i in range(0, len(Word_In_List)):
-                    if guess == Word_In_List[i]:
-                        # [i] counts along the position to check if the guess matches any of the letter
-                        Guessed_Word[i] = guess
-
+Choose a difficulty: """).lower()
+        if difficulty in difficulties:
+            return difficulties[difficulty]
         else:
-            print(colors.red + "You have already guessed that letter! No lives charged!", colors.reset)
-            # if that letter has been guessed inform them and don't take a life off them
+            print(colors.red + 'Invalid difficulty. Please try again.' + colors.reset)
 
 
-game()
+def display_game_status(guessed_word, lives, guessed):
+    """Print the current game status including guessed word, lives left, and guessed letters."""
+    print(" ".join(guessed_word))
+    print(f"Lives left: {lives}")
+    print(f"Guessed letters: {', '.join(guessed)}")
+
+
+def restart_game():
+    """Ask if the player wants to restart the game."""
+    while True:
+        question = input('Want to play again (yes or no): ').lower()
+        if question in ['yes', 'y']:
+            return True
+        elif question in ['no', 'n']:
+            return False
+        else:
+            print(colors.red + "Invalid input. Please answer 'yes' or 'no'." + colors.reset)
+
+
+def game():
+    """Main game loop for playing Hangman."""
+    word = random.choice(words.words)
+    guessed_word = list("_" * len(word))
+    word_in_list = list(word)
+    guessed_letters = []
+    win_count = 0
+
+    lives = choose_difficulty()
+
+    while lives > 0:
+        display_game_status(guessed_word, lives, guessed_letters)
+        
+        guess = input("Guess a letter: ").lower()
+
+        if not validate_guess(guess):
+            continue
+        
+        if guess in guessed_letters:
+            print(colors.yellow + "You've already guessed that letter! No lives lost." + colors.reset)
+            continue
+
+        guessed_letters.append(guess)
+
+        if guess in word_in_list:
+            for i, letter in enumerate(word_in_list):
+                if letter == guess:
+                    guessed_word[i] = guess
+            if guessed_word == word_in_list:
+                print(colors.green + "You guessed the word correctly!" + colors.reset)
+                win_count += 1
+                print(f"Win Counter: {win_count}")
+                if restart_game():
+                    game()
+                else:
+                    quit()
+        else:
+            lives -= 1
+            print(colors.red + "Wrong guess!" + colors.reset)
+            if lives == 0:
+                print(colors.red + "Game Over! The correct word was: " + ''.join(word_in_list) + colors.reset)
+                if restart_game():
+                    game()
+                else:
+                    quit()
+
+
+if __name__ == "__main__":
+    game()
