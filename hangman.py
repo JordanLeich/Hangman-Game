@@ -155,7 +155,7 @@ def game():
         display_hangman(lives)
         display_game_status(guessed_word, lives, guessed_letters)
 
-        guess = input("Guess a letter (or type 'hint' to use a hint, 'exit' to quit): ").lower()
+        guess = input("Guess a letter or the full word (or type 'hint' to use a hint, 'exit' to quit): ").lower()
 
         if guess == "exit":
             print(colors.red + "Thanks for playing! Exiting game..." + colors.reset)
@@ -165,6 +165,31 @@ def game():
             lives = use_hint(guessed_word, word_in_list, lives)
             continue
 
+        # Check for full word guess
+        if len(guess) > 1:
+            if guess == word:
+                print(colors.green + "You guessed the word correctly!" + colors.reset)
+                wins += 1
+                print(f"Win Counter: {wins}")
+                save_score(wins, losses)
+                if restart_game():
+                    game()
+                else:
+                    quit()
+            else:
+                lives -= 1
+                print(colors.red + "Wrong guess! That was not the correct word." + colors.reset)
+                if lives == 0:
+                    print(colors.red + "Game Over! The correct word was: " + ''.join(word_in_list) + colors.reset)
+                    losses += 1
+                    save_score(wins, losses)
+                    if restart_game():
+                        game()
+                    else:
+                        quit()
+            continue  # Skip to next iteration after full word guess
+
+        # Validate single letter guess
         if not validate_guess(guess):
             continue
 
