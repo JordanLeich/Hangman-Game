@@ -16,8 +16,11 @@ categories = {
     "languages": ["english", "spanish", "french", "german", "chinese", "japanese", "hindi", "arabic", "russian", "portuguese"]
 }
 
+# Add a random category for selection
+categories["random"] = [word for category in categories.values() for word in category]  # Combine all words
+
 # Hangman visual stages
-HANGMAN_PICS = ['''
+HANGMAN_PICS = [''' 
   +---+
       |
       |
@@ -70,7 +73,7 @@ def choose_category():
         print("\nAvailable categories:")
         for category in categories:
             print(f"- {category.capitalize()}")
-        category = input("\nChoose a category: ").lower()
+        category = input("\nChoose a category (or type 'random' for a random selection): ").lower()
         if category in categories:
             return random.choice(categories[category])
         else:
@@ -224,6 +227,6 @@ def game():
                 else:
                     quit()
 
-# Run the game
+# Start the game
 if __name__ == "__main__":
     game()
